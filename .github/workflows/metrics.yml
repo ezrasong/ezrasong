@@ -43,7 +43,6 @@ jobs:
           INPUT_PLUGINS_ERRORS_FATAL: 'yes'
           INPUT_RETRIES: '2'
           INPUT_RETRIES_DELAY: '2'
-          INPUT_DEBUG: 'yes'
           INPUT_BASE: activity, repositories
           INPUT_REPOSITORIES_AFFILIATIONS: ''
           INPUT_REPOSITORIES_BATCH: '25'
@@ -65,7 +64,7 @@ jobs:
 
             docker run --rm --init \
               --env INPUT_TOKEN --env INPUT_USER --env INPUT_OUTPUT_ACTION \
-              --env INPUT_PLUGINS_ERRORS_FATAL --env INPUT_RETRIES --env INPUT_RETRIES_DELAY --env INPUT_DEBUG \
+              --env INPUT_PLUGINS_ERRORS_FATAL --env INPUT_RETRIES --env INPUT_RETRIES_DELAY \
               --env INPUT_BASE --env INPUT_REPOSITORIES_AFFILIATIONS --env INPUT_REPOSITORIES_BATCH \
               --env INPUT_CONFIG_TIMEZONE --env INPUT_CONFIG_ANIMATIONS --env INPUT_CONFIG_PADDING \
               --env INPUT_PLUGIN_ISOCALENDAR --env INPUT_PLUGIN_ISOCALENDAR_DURATION \
@@ -73,7 +72,10 @@ jobs:
               --env "INPUT_CONFIG_DISPLAY=$layout" --env "INPUT_FILENAME=$filename" \
               --mount "type=bind,src=$RUNNER_TEMP/profile-metrics,dst=/renders" \
               --mount "type=bind,src=$PWD/.github/metrics/repositories.graphql,dst=/metrics/source/plugins/base/queries/repositories.graphql,readonly" \
-              ghcr.io/lowlighter/metrics:v3.34@sha256:257392f90340f916cb8b815026f259399f6b246d3eb7de38b58bfe7a07bd5b65
+              --mount "type=bind,src=$PWD/.github/metrics/render.mjs,dst=/profile-metrics.mjs,readonly" \
+              --entrypoint node \
+              ghcr.io/lowlighter/metrics:v3.34@sha256:257392f90340f916cb8b815026f259399f6b246d3eb7de38b58bfe7a07bd5b65 \
+              /profile-metrics.mjs
           done
 
       - name: Verify and publish both cards

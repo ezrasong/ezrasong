@@ -10,7 +10,7 @@ query BaseRepositories {
         isFork
         forkCount
         watchers { totalCount }
-        stargazers { totalCount }
+        stargazerCount
         releases { totalCount }
         languages(first: 8) {
           edges {
