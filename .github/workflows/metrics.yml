@@ -30,12 +30,12 @@ jobs:
           user: ezrasong
           filename: ${{ matrix.filename }}
           committer_message: Update GitHub metrics
-          output_condition: data-changed
+          output_action: none
           plugins_errors_fatal: 'yes'
           retries: 1
           retries_delay: 0
           base: activity, repositories
-          repositories_affiliations: owner
+          repositories_affiliations: ''
           config_timezone: America/Toronto
           config_animations: 'no'
           config_display: ${{ matrix.display }}
@@ -80,3 +80,18 @@ jobs:
             path[fill="#40c463" i] { fill: #006d32; }
             path[fill="#30a14e" i] { fill: #26a641; }
             path[fill="#216e39" i] { fill: #39d353; }
+      - name: Check public repository coverage
+        env:
+          METRICS_FILE: /metrics_renders/${{ matrix.filename }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import xml.etree.ElementTree as ET
+
+          root = ET.parse(os.environ['METRICS_FILE']).getroot()
+          titles = [''.join(node.itertext()).strip() for node in root.iter('{http://www.w3.org/1999/xhtml}h2')]
+          print('\n'.join(titles))
+          assert any(re.fullmatch(r'(?:[2-9]|[1-9][0-9]+) Repositories', title) for title in titles)
+          assert any(re.fullmatch(r'(?:[2-9]|[1-9][0-9]+) Languages', title) for title in titles)
+          PY
