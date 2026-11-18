@@ -2,7 +2,7 @@
 
 I study Honours Math at Waterloo. I worked on web and iOS/macOS apps at Unmodal Research.
 
-[Website](https://ezrasong.me/) · [Résumé](https://ezrasong.me/Ezra_Song_Resume.pdf) · [LinkedIn](https://linkedin.com/in/e34song)
+[Website](https://ezrasong.me/) · [Résumé](https://ezrasong.me/Ezra_Song_Resume.pdf) · [LinkedIn](https://www.linkedin.com/in/e34song/)
 
 <a href="https://ezrasong.me/">
   <picture>
@@ -16,7 +16,14 @@ I study Honours Math at Waterloo. I worked on web and iOS/macOS apps at Unmodal 
 <table>
   <tr>
     <td width="50%" align="center"><a href="https://ezrasong.me/seoul.html"><img src="assets/mini-seoul.png" alt="A poro outside Portfolio Station in Mini Seoul" width="440"></a></td>
-    <td width="50%" align="center"><a href="https://github.com/ezrasong/sonolyth"><img src="assets/sonolyth.png" alt="Sonolyth app icon" width="160"></a></td>
+    <td width="50%" align="center">
+      <a href="https://github.com/ezrasong/sonolyth">
+        <picture>
+          <source media="(prefers-color-scheme: light)" srcset="assets/sonolyth-light.svg">
+          <img src="assets/sonolyth-logo.ico" alt="Sonolyth logo" width="160">
+        </picture>
+      </a>
+    </td>
   </tr>
   <tr>
     <td valign="top"><strong><a href="https://ezrasong.me/seoul.html">Mini Seoul</a></strong><br>Drive a poro around Seoul and knock on doors to see my work. <a href="https://github.com/ezrasong/ezrasong.github.io">Source</a></td>
@@ -31,7 +38,7 @@ I study Honours Math at Waterloo. I worked on web and iOS/macOS apps at Unmodal 
 - [Discord Automation Bot](https://github.com/ezrasong/Discord-Bot) adds moderation, reaction roles, AMP server controls, and queued music to Discord.
 - [UW Course Planner](https://github.com/ezrasong/UW-Course-Planner) saves Waterloo schedules and lets you drag courses between terms.
 - [Lowcord](https://github.com/ezrasong/lowcord) is a slim Electron Discord client forked from Legcord.
-- [LeReplacer](https://ezrasong.me/portfolio.html#work) swaps faces live in the browser.
+- [LeReplacer](https://github.com/ShreyShingala/LeReplacerExtension) swaps faces live in the browser.
 - [Claude + Kiro Proxy](https://github.com/ezrasong/claude-kiro-proxy) connects Claude Code Proxy to Kiro Gateway from the CLI.
 
 [All repositories](https://github.com/ezrasong?tab=repositories)
