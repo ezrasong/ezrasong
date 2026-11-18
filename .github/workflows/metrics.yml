@@ -26,12 +26,14 @@ jobs:
       - name: Render GitHub activity
         uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6 # v3.34
         with:
-          token: ${{ secrets.METRICS_TOKEN }}
+          token: ${{ secrets.METRICS_TOKEN || github.token }}
           user: ezrasong
           filename: ${{ matrix.filename }}
           committer_message: Update GitHub metrics
           output_condition: data-changed
           plugins_errors_fatal: 'yes'
+          retries: 1
+          retries_delay: 0
           base: activity, repositories
           repositories_affiliations: owner
           config_timezone: America/Toronto
