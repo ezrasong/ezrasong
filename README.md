@@ -7,7 +7,7 @@ I study Honours Math at Waterloo. I worked on web and iOS/macOS apps at Unmodal 
 <a href="https://ezrasong.me/">
   <picture>
     <source media="(prefers-reduced-motion: reduce)" srcset="assets/orca-still.png">
-    <img src="assets/orca.gif" alt="Feed the ASCII orca on my website" width="960">
+    <img src="assets/orca-loop.gif" alt="Feed the ASCII orca on my website" width="960">
   </picture>
 </a>
 

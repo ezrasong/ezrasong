@@ -49,8 +49,7 @@ jobs:
           INPUT_CONFIG_TIMEZONE: America/Toronto
           INPUT_CONFIG_ANIMATIONS: 'no'
           INPUT_CONFIG_PADDING: '0, 8'
-          INPUT_PLUGIN_ISOCALENDAR: 'yes'
-          INPUT_PLUGIN_ISOCALENDAR_DURATION: full-year
+          INPUT_PLUGIN_CALENDAR: 'yes'
           INPUT_PLUGIN_LANGUAGES: 'yes'
           INPUT_PLUGIN_LANGUAGES_LIMIT: '6'
         run: |
@@ -67,15 +66,14 @@ jobs:
               --env INPUT_PLUGINS_ERRORS_FATAL --env INPUT_RETRIES --env INPUT_RETRIES_DELAY \
               --env INPUT_BASE --env INPUT_REPOSITORIES_AFFILIATIONS --env INPUT_REPOSITORIES_BATCH \
               --env INPUT_CONFIG_TIMEZONE --env INPUT_CONFIG_ANIMATIONS --env INPUT_CONFIG_PADDING \
-              --env INPUT_PLUGIN_ISOCALENDAR --env INPUT_PLUGIN_ISOCALENDAR_DURATION \
+              --env INPUT_PLUGIN_CALENDAR \
               --env INPUT_PLUGIN_LANGUAGES --env INPUT_PLUGIN_LANGUAGES_LIMIT --env INPUT_EXTRAS_CSS \
               --env "INPUT_CONFIG_DISPLAY=$layout" --env "INPUT_FILENAME=$filename" \
               --mount "type=bind,src=$RUNNER_TEMP/profile-metrics,dst=/renders" \
-              --mount "type=bind,src=$PWD/.github/metrics/repositories.graphql,dst=/metrics/source/plugins/base/queries/repositories.graphql,readonly" \
-              --mount "type=bind,src=$PWD/.github/metrics/render.mjs,dst=/profile-metrics.mjs,readonly" \
+              --mount "type=bind,src=$PWD/.github/metrics,dst=/profile-metrics,readonly" \
               --entrypoint node \
               ghcr.io/lowlighter/metrics:v3.34@sha256:257392f90340f916cb8b815026f259399f6b246d3eb7de38b58bfe7a07bd5b65 \
-              /profile-metrics.mjs
+              /profile-metrics/render.mjs
           done
 
       - name: Verify and publish both cards
@@ -90,8 +88,10 @@ jobs:
               card = ET.parse(render_dir / filename).getroot()
               titles = [''.join(node.itertext()).strip() for node in card.iter('{http://www.w3.org/1999/xhtml}h2')]
               language_bar = any(node.get('class') == 'bar' for node in card.iter('{http://www.w3.org/2000/svg}svg'))
+              calendar = next((node for node in card.iter('{http://www.w3.org/2000/svg}svg') if node.get('class') == 'profile-calendar-grid'), None)
+              days = len(list(calendar.iter('{http://www.w3.org/2000/svg}rect'))) if calendar is not None else 0
               print(f'{filename} ({card.get("width")}px, language bar={language_bar}): {", ".join(titles)}', flush=True)
-              if card.get('width') != width or 'Contributions calendar' not in titles or not language_bar:
+              if card.get('width') != width or days < 365 or not language_bar:
                   raise ValueError(f'{filename} is missing activity data or has the wrong layout')
           PY
 
