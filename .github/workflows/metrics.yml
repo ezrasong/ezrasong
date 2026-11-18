@@ -9,95 +9,70 @@ concurrency:
   group: profile-metrics
 
 jobs:
-  render:
+  refresh:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      max-parallel: 1
-      matrix:
-        include:
-          - display: large
-            filename: assets/github-metrics-wide.svg
-          - display: regular
-            filename: assets/github-metrics.svg
     permissions:
       contents: write
     steps:
-      - name: Verify public repository access
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Render profile cards with Metrics
         env:
-          GH_TOKEN: ${{ github.token }}
+          INPUT_TOKEN: ${{ github.token }}
+          INPUT_USER: ${{ github.repository_owner }}
+          INPUT_OUTPUT_ACTION: none
+          INPUT_PLUGINS_ERRORS_FATAL: 'yes'
+          INPUT_RETRIES: '2'
+          INPUT_RETRIES_DELAY: '2'
+          INPUT_BASE: activity, repositories
+          INPUT_REPOSITORIES_AFFILIATIONS: ''
+          INPUT_REPOSITORIES_BATCH: '25'
+          INPUT_CONFIG_TIMEZONE: America/Toronto
+          INPUT_CONFIG_ANIMATIONS: 'no'
+          INPUT_CONFIG_PADDING: '0, 8'
+          INPUT_PLUGIN_ISOCALENDAR: 'yes'
+          INPUT_PLUGIN_ISOCALENDAR_DURATION: full-year
+          INPUT_PLUGIN_LANGUAGES: 'yes'
+          INPUT_PLUGIN_LANGUAGES_LIMIT: '6'
         run: |
-          gh api graphql -f 'query=query { user(login: "ezrasong") { repositories(first: 25, isFork: false, privacy: PUBLIC) { totalCount nodes { languages(first: 1) { totalCount } } } } }' --jq '.data.user.repositories | {publicRepositories: .totalCount, repositoriesWithLanguages: ([.nodes[] | select(.languages.totalCount > 0)] | length)} | if .publicRepositories < 2 or .repositoriesWithLanguages < 2 then error("Repository token returned incomplete public data") else . end'
-      - name: Render GitHub activity
-        uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6 # v3.34
-        with:
-          token: ${{ secrets.METRICS_TOKEN || github.token }}
-          user: ezrasong
-          filename: ${{ matrix.filename }}
-          committer_message: Update GitHub metrics
-          output_action: none
-          plugins_errors_fatal: 'yes'
-          retries: 2
-          retries_delay: 2
-          base: activity, repositories
-          repositories_affiliations: ''
-          repositories_batch: 25
-          config_timezone: America/Toronto
-          config_animations: 'no'
-          config_display: ${{ matrix.display }}
-          config_padding: '0, 8'
-          plugin_isocalendar: 'yes'
-          plugin_isocalendar_duration: full-year
-          plugin_languages: 'yes'
-          plugin_languages_limit: 6
-          extras_css: |
-            svg { color: #e6edf3; }
-            .items-wrapper {
-              box-sizing: border-box;
-              padding: 12px 15px;
-              background: #0d1117;
-              border: 1px solid #30363d;
-              border-radius: 6px;
-            }
-            svg.large .items-wrapper {
-              display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-              grid-template-rows: repeat(4, auto);
-              column-gap: 20px;
-              align-items: start;
-            }
-            svg.large .items-wrapper > section {
-              grid-column: 1;
-              width: auto;
-            }
-            svg.large .items-wrapper > section:last-child {
-              grid-column: 2;
-              grid-row: 1 / -1;
-              align-self: stretch;
-              border-left: 1px solid #30363d;
-              padding-left: 14px;
-            }
-            /* Metrics draws the large language bar at a fixed 920px. */
-            svg.large .items-wrapper > .column .bar { transform: scaleX(.49); }
-            h1, h2, h3 { color: #58a6ff; }
-            .field svg { fill: #8b949e; }
-            path[fill="#ebedf0" i] { fill: #161b22; }
-            path[fill="#9be9a8" i] { fill: #0e4429; }
-            path[fill="#40c463" i] { fill: #006d32; }
-            path[fill="#30a14e" i] { fill: #26a641; }
-            path[fill="#216e39" i] { fill: #39d353; }
-      - name: Check public repository coverage
-        env:
-          METRICS_FILE: /metrics_renders/${{ matrix.filename }}
+          export INPUT_EXTRAS_CSS="$(<.github/metrics/theme.css)"
+          for layout in large regular; do
+            filename=github-metrics.svg
+            if [[ "$layout" == large ]]; then
+              filename=github-metrics-wide.svg
+            fi
+
+            docker run --rm --init \
+              --env INPUT_TOKEN --env INPUT_USER --env INPUT_OUTPUT_ACTION \
+              --env INPUT_PLUGINS_ERRORS_FATAL --env INPUT_RETRIES --env INPUT_RETRIES_DELAY \
+              --env INPUT_BASE --env INPUT_REPOSITORIES_AFFILIATIONS --env INPUT_REPOSITORIES_BATCH \
+              --env INPUT_CONFIG_TIMEZONE --env INPUT_CONFIG_ANIMATIONS --env INPUT_CONFIG_PADDING \
+              --env INPUT_PLUGIN_ISOCALENDAR --env INPUT_PLUGIN_ISOCALENDAR_DURATION \
+              --env INPUT_PLUGIN_LANGUAGES --env INPUT_PLUGIN_LANGUAGES_LIMIT --env INPUT_EXTRAS_CSS \
+              --env "INPUT_CONFIG_DISPLAY=$layout" --env "INPUT_FILENAME=$filename" \
+              --mount "type=bind,src=$PWD/assets,dst=/renders" \
+              --mount "type=bind,src=$PWD/.github/metrics/repositories.graphql,dst=/metrics/source/plugins/base/queries/repositories.graphql,readonly" \
+              ghcr.io/lowlighter/metrics:v3.34@sha256:257392f90340f916cb8b815026f259399f6b246d3eb7de38b58bfe7a07bd5b65
+          done
+
+      - name: Verify and publish both cards
         run: |
           python3 - <<'PY'
-          import os
-          import re
           import xml.etree.ElementTree as ET
 
-          root = ET.parse(os.environ['METRICS_FILE']).getroot()
-          titles = [''.join(node.itertext()).strip() for node in root.iter('{http://www.w3.org/1999/xhtml}h2')]
-          print('\n'.join(titles))
-          assert any(re.fullmatch(r'(?:[2-9]|[1-9][0-9]+) Repositories', title) for title in titles)
-          assert any(re.fullmatch(r'(?:[2-9]|[1-9][0-9]+) Languages', title) for title in titles)
+          for filename, width in (('github-metrics.svg', '480'), ('github-metrics-wide.svg', '960')):
+              card = ET.parse(f'assets/{filename}').getroot()
+              titles = [''.join(node.itertext()).strip() for node in card.iter('{http://www.w3.org/1999/xhtml}h2')]
+              language_bar = any(node.get('class') == 'bar' for node in card.iter('{http://www.w3.org/2000/svg}svg'))
+              if card.get('width') != width or 'Contributions calendar' not in titles or not language_bar:
+                  raise ValueError(f'{filename} is missing activity data or has the wrong layout')
+              print(f'{filename}: {", ".join(titles)}')
           PY
+
+          git add -- assets/github-metrics.svg assets/github-metrics-wide.svg
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Update GitHub metrics'
+          git push

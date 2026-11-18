@@ -1,0 +1,25 @@
+# Only query public fields used by the activity, repositories, and languages sections.
+query BaseRepositories {
+  $account(login: "$login") {
+    $type($after first: $repositories $forks $affiliations $constraints, privacy: PUBLIC, orderBy: {field: UPDATED_AT, direction: DESC}) {
+      edges { cursor }
+      nodes {
+        updatedAt
+        name
+        owner { login }
+        isFork
+        forkCount
+        watchers { totalCount }
+        stargazers { totalCount }
+        releases { totalCount }
+        languages(first: 8) {
+          edges {
+            size
+            node { color name }
+          }
+        }
+        licenseInfo { name spdxId }
+      }
+    }
+  }
+}

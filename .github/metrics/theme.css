@@ -1,0 +1,35 @@
+svg { color: #e6edf3; }
+.items-wrapper {
+  box-sizing: border-box;
+  padding: 12px 15px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+}
+svg.large .items-wrapper {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(4, auto);
+  column-gap: 20px;
+  align-items: start;
+}
+svg.large .items-wrapper > section {
+  grid-column: 1;
+  width: auto;
+}
+svg.large .items-wrapper > section:last-child {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  align-self: stretch;
+  border-left: 1px solid #30363d;
+  padding-left: 14px;
+}
+/* Metrics draws the large language bar at a fixed 920px. */
+svg.large .items-wrapper > .column .bar { transform: scaleX(.49); }
+h1, h2, h3 { color: #58a6ff; }
+.field svg { fill: #8b949e; }
+path[fill="#ebedf0" i] { fill: #161b22; }
+path[fill="#9be9a8" i] { fill: #0e4429; }
+path[fill="#40c463" i] { fill: #006d32; }
+path[fill="#30a14e" i] { fill: #26a641; }
+path[fill="#216e39" i] { fill: #39d353; }
