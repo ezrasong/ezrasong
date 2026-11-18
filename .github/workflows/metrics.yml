@@ -23,6 +23,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Verify public repository access
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api graphql -f 'query=query { user(login: "ezrasong") { repositories(first: 25, isFork: false, privacy: PUBLIC) { totalCount nodes { languages(first: 1) { totalCount } } } } }' --jq '.data.user.repositories | {publicRepositories: .totalCount, repositoriesWithLanguages: ([.nodes[] | select(.languages.totalCount > 0)] | length)} | if .publicRepositories < 2 or .repositoriesWithLanguages < 2 then error("Repository token returned incomplete public data") else . end'
       - name: Render GitHub activity
         uses: lowlighter/metrics@65836723097537a54cd8eb90f61839426b4266b6 # v3.34
         with:
@@ -32,10 +37,11 @@ jobs:
           committer_message: Update GitHub metrics
           output_action: none
           plugins_errors_fatal: 'yes'
-          retries: 1
-          retries_delay: 0
+          retries: 2
+          retries_delay: 2
           base: activity, repositories
           repositories_affiliations: ''
+          repositories_batch: 25
           config_timezone: America/Toronto
           config_animations: 'no'
           config_display: ${{ matrix.display }}
