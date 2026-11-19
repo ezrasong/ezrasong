@@ -50,7 +50,7 @@ I study Honours Math at Waterloo. I worked on web and iOS/macOS apps at Unmodal 
 <a href="https://github.com/ezrasong?tab=overview">
   <picture>
     <source media="(min-width: 1024px)" srcset="assets/github-metrics-wide.svg">
-    <img src="assets/github-metrics.svg" alt="GitHub activity, public repositories, contribution calendar, streaks, and repository languages">
+    <img src="assets/github-metrics.svg" alt="GitHub activity, public repositories, and repository languages">
   </picture>
 </a>
 

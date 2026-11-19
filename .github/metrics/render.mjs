@@ -9,9 +9,5 @@ if (!source.includes(original)) {
   throw new Error('Metrics changed how it reads repository counts');
 }
 await writeFile(core, source.replace(original, countPublicStars));
-await Promise.all([
-  copyFile('/profile-metrics/repositories.graphql', '/metrics/source/plugins/base/queries/repositories.graphql'),
-  copyFile('/profile-metrics/calendar.mjs', '/metrics/source/plugins/calendar/index.mjs'),
-  copyFile('/profile-metrics/calendar.ejs', '/metrics/source/templates/classic/partials/calendar.ejs'),
-]);
+await copyFile('/profile-metrics/repositories.graphql', '/metrics/source/plugins/base/queries/repositories.graphql');
 await import('/metrics/source/app/action/index.mjs');

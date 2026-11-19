@@ -12,8 +12,7 @@ svg.large .items-wrapper {
   grid-template-areas:
     "activity repositories"
     "activity languages"
-    "activity language-bar"
-    "calendar calendar";
+    "activity language-bar";
   column-gap: 20px;
   align-items: start;
 }
@@ -24,38 +23,6 @@ svg.large .items-wrapper > section:nth-child(1) { grid-area: activity; }
 svg.large .items-wrapper > section:nth-child(2) { grid-area: repositories; }
 svg.large .items-wrapper > section:nth-child(3) { grid-area: languages; }
 svg.large .items-wrapper > section:nth-child(4) { grid-area: language-bar; }
-svg.large .items-wrapper > .profile-calendar { grid-area: calendar; }
-.profile-calendar {
-  border-top: 1px solid #30363d;
-  margin-top: 12px;
-  padding-top: 6px;
-}
-.profile-calendar-summary {
-  margin: 6px 7px 12px;
-  color: #8b949e;
-}
-svg.profile-calendar-grid {
-  display: block;
-  width: 100%;
-}
-.profile-calendar-grid text {
-  font-size: 12px;
-  fill: #8b949e;
-}
-.profile-calendar-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 6px 14px;
-  margin: 8px 7px 0;
-  color: #8b949e;
-  font-size: 11px;
-}
-.profile-calendar-legend {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
 /* Metrics draws the large language bar at a fixed 920px. */
 svg.large .items-wrapper > .column .bar { transform: scaleX(.49); }
 h1, h2, h3 { color: #58a6ff; }
